@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理ダッシュボード — 問診票システム</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:15px}
+.wrap{max-width:860px;margin:0 auto;padding:2rem 1rem 4rem}
+h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.subtitle{font-size:13px;color:#666;margin-bottom:2rem}
+
+/* ログイン */
+.login-box{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:2rem;max-width:400px;margin:4rem auto}
+.login-box h2{font-size:17px;font-weight:700;margin-bottom:1.5rem;text-align:center}
+.login-box input{width:100%;padding:10px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;outline:none;font-family:inherit;margin-bottom:12px}
+.login-box input:focus{border-color:#1D9E75}
+.login-btn{width:100%;padding:12px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}
+
+/* メイン */
+.main{display:none}
+.card{background:#fff;border:1px solid #e8e8e6;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.card h2{font-size:16px;font-weight:700;margin-bottom:1.25rem;padding-bottom:10px;border-bottom:1px solid #f0f0f0}
+
+/* フォーム */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;font-weight:700;color:#666}
+.form-group input{padding:9px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;outline:none;font-family:inherit}
+.form-group input:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+.form-group.full{grid-column:1/-1}
+.add-btn{padding:10px 24px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+.add-btn:hover{opacity:.85}
+
+/* テーブル */
+.clinic-table{width:100%;border-collapse:collapse}
+.clinic-table th{font-size:12px;font-weight:700;color:#666;padding:8px 10px;border-bottom:2px solid #e8e8e6;text-align:left;white-space:nowrap}
+.clinic-table td{font-size:13px;padding:10px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.clinic-table tr:last-child td{border-bottom:none}
+.url-cell{font-size:12px;color:#1a6fc4;word-break:break-all}
+.copy-btn{padding:4px 10px;font-size:11px;background:#f0f0ee;border:1px solid #ddd;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.copy-btn:hover{background:#e8e8e6}
+.del-btn{padding:4px 10px;font-size:11px;background:#fff0f0;border:1px solid #fcc;border-radius:6px;cursor:pointer;color:#c0392b;font-family:inherit}
+.del-btn:hover{background:#ffe0e0}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#E1F5EE;color:#0F6E56}
+.empty{text-align:center;color:#aaa;font-size:13px;padding:2rem 0}
+.msg{font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:none}
+.msg.ok{background:#E1F5EE;color:#0F6E56;display:block}
+.msg.err{background:#FCEBEB;color:#A32D2D;display:block}
+.logout-btn{float:right;padding:6px 14px;font-size:12px;background:#f0f0ee;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-family:inherit}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+}
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-box" id="loginBox">
+  <h2>管理ダッシュボード</h2>
+  <input type="password" id="pwInput" placeholder="管理パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+  <button class="login-btn" onclick="doLogin()">ログイン</button>
+  <p id="loginErr" style="color:#c0392b;font-size:13px;margin-top:8px;display:none">パスワードが違います</p>
+</div>
+
+<!-- メイン画面 -->
+<div class="main" id="mainArea">
+<div class="wrap">
+  <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+  <h1>管理ダッシュボード</h1>
+  <p class="subtitle">治療院の追加・管理・URL発行</p>
+
+  <!-- 治療院追加 -->
+  <div class="card">
+    <h2>治療院を追加</h2>
+    <div id="addMsg" class="msg"></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>ID（英数字・ハイフンのみ）<span style="color:#c0392b">必須</span></label>
+        <input type="text" id="newId" placeholder="例: hikari, aoba-seikotsu">
+      </div>
+      <div class="form-group">
+        <label>院名<span style="color:#c0392b">必須</span></label>
+        <input type="text" id="newName" placeholder="例: ひかり鍼灸整骨院">
+      </div>
+      <div class="form-group full">
+        <label>メールアドレス<span style="color:#c0392b">必須</span></label>
+        <input type="email" id="newEmail" placeholder="例: info@clinic.jp">
+      </div>
+      <div class="form-group full">
+        <label>住所</label>
+        <input type="text" id="newAddress" placeholder="例: 〒672-8043 兵庫県姫路市飾磨区上野田3丁目81番地3">
+      </div>
+      <div class="form-group">
+        <label>電話番号</label>
+        <input type="text" id="newTel" placeholder="例: 079-228-9687">
+      </div>
+    </div>
+    <button class="add-btn" onclick="addClinic()">追加する</button>
+  </div>
+
+  <!-- 治療院一覧 -->
+  <div class="card">
+    <h2>治療院一覧</h2>
+    <div id="listMsg" class="msg"></div>
+    <div id="clinicList"></div>
+  </div>
+</div>
+</div>
+
+<script>
+var BASE_URL = window.location.origin;
+var _pw = '';
+
+function doLogin(){
+  var pw = document.getElementById('pwInput').value.trim();
+  if(!pw){return;}
+  fetch('/api/clinics', {
+    headers:{'Authorization':'Bearer '+pw}
+  }).then(function(r){
+    if(r.ok){
+      _pw = pw;
+      document.getElementById('loginBox').style.display='none';
+      document.getElementById('mainArea').style.display='block';
+      loadClinics();
+    } else {
+      document.getElementById('loginErr').style.display='block';
+    }
+  }).catch(function(){
+    document.getElementById('loginErr').style.display='block';
+  });
+}
+
+function doLogout(){
+  _pw='';
+  document.getElementById('loginBox').style.display='block';
+  document.getElementById('mainArea').style.display='none';
+  document.getElementById('pwInput').value='';
+}
+
+function loadClinics(){
+  fetch('/api/clinics',{headers:{'Authorization':'Bearer '+_pw}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var html='';
+      var keys=Object.keys(data);
+      if(keys.length===0){
+        html='<p class="empty">まだ治療院が登録されていません</p>';
+      } else {
+        html='<table class="clinic-table"><thead><tr>'
+          +'<th>ID</th><th>院名</th><th>電話番号</th><th>専用URL</th><th>操作</th>'
+          +'</tr></thead><tbody>';
+        keys.forEach(function(id){
+          var c=data[id];
+          var url=BASE_URL+'/?id='+id;
+          html+='<tr>'
+            +'<td><span class="badge">'+id+'</span></td>'
+            +'<td style="font-weight:600">'+c.name+'</td>'
+            +'<td>'+( c.tel||'—')+'</td>'
+            +'<td class="url-cell">'+url+'<br>'
+            +'<button class="copy-btn" onclick="copyUrl(\''+url+'\')">URLをコピー</button></td>'
+            +'<td><button class="del-btn" onclick="deleteClinic(\''+id+'\',\''+c.name+'\')">削除</button></td>'
+            +'</tr>';
+        });
+        html+='</tbody></table>';
+      }
+      document.getElementById('clinicList').innerHTML=html;
+    });
+}
+
+function addClinic(){
+  var id=document.getElementById('newId').value.trim();
+  var name=document.getElementById('newName').value.trim();
+  var email=document.getElementById('newEmail').value.trim();
+  var address=document.getElementById('newAddress').value.trim();
+  var tel=document.getElementById('newTel').value.trim();
+
+  if(!id||!name||!email){
+    showMsg('addMsg','ID・院名・メールアドレスは必須です','err');
+    return;
+  }
+  if(!/^[a-z0-9\-]+$/.test(id)){
+    showMsg('addMsg','IDは英小文字・数字・ハイフンのみ使えます','err');
+    return;
+  }
+
+  fetch('/api/clinics',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+_pw},
+    body:JSON.stringify({id,name,email,address,tel})
+  }).then(function(r){return r.json();})
+  .then(function(res){
+    if(res.ok){
+      showMsg('addMsg',name+'を追加しました！','ok');
+      document.getElementById('newId').value='';
+      document.getElementById('newName').value='';
+      document.getElementById('newEmail').value='';
+      document.getElementById('newAddress').value='';
+      document.getElementById('newTel').value='';
+      loadClinics();
+    } else {
+      showMsg('addMsg',res.error||'追加に失敗しました','err');
+    }
+  });
+}
+
+function deleteClinic(id, name){
+  if(!confirm(name+'を削除しますか？\nこの操作は取り消せません。')){return;}
+  fetch('/api/clinics',{
+    method:'DELETE',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+_pw},
+    body:JSON.stringify({id})
+  }).then(function(r){return r.json();})
+  .then(function(res){
+    if(res.ok){
+      showMsg('listMsg',name+'を削除しました','ok');
+      loadClinics();
+    } else {
+      showMsg('listMsg',res.error||'削除に失敗しました','err');
+    }
+  });
+}
+
+function copyUrl(url){
+  navigator.clipboard.writeText(url).then(function(){
+    alert('URLをコピーしました！\n'+url);
+  }).catch(function(){
+    prompt('以下のURLをコピーしてください：',url);
+  });
+}
+
+function showMsg(id, text, type){
+  var el=document.getElementById(id);
+  el.textContent=text;
+  el.className='msg '+type;
+  setTimeout(function(){el.style.display='none';el.className='msg';},4000);
+}
+</script>
+</body>
+</html>
