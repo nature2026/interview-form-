@@ -1,30 +1,25 @@
-const fs = require('fs');
-const path = require('path');
+const REPO = process.env.GITHUB_REPO;
+const TOKEN = process.env.GITHUB_TOKEN;
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const CLINICS_PATH = path.join(process.cwd(), 'clinics.json');
-  let clinics = {};
   try {
-    clinics = JSON.parse(fs.readFileSync(CLINICS_PATH, 'utf8'));
-  } catch {
-    return res.status(500).json({ error: 'データ読み込みエラー' });
-  }
+    const r = await fetch(
+      `https://api.github.com/repos/${REPO}/contents/clinics.json`,
+      { headers: { Authorization: `token ${TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+    );
+    if (!r.ok) throw new Error('取得失敗');
+    const data = await r.json();
+    const clinics = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
 
-  const { id } = req.query;
-  if (id) {
-    if (!clinics[id]) return res.status(404).json({ error: '治療院が見つかりません' });
-    // メールアドレスは返さない（セキュリティ）
-    const { email, ...publicInfo } = clinics[id];
-    return res.status(200).json({ id, ...publicInfo });
+    const { id } = req.query;
+    if (id) {
+      if (!clinics[id]) return res.status(404).json({ error: '治療院が見つかりません' });
+      return res.status(200).json({ id, ...clinics[id] });
+    }
+    return res.status(200).json(clinics);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
-
-  // 全件（メールなし）
-  const publicClinics = Object.entries(clinics).reduce((acc, [k, v]) => {
-    const { email, ...rest } = v;
-    acc[k] = rest;
-    return acc;
-  }, {});
-  return res.status(200).json(publicClinics);
 };
