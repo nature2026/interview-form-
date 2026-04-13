@@ -397,7 +397,7 @@ function buildLayoutHTML(d, mode){
 
 
   body+='<div class="page">';
-  body+='<div class="clinic">ひかり鍼灸整骨院</div>';
+  body+='<div class="clinic">'+(window._clinicName||'ひかり鍼灸整骨院')+'</div>';
   body+='<div class="form-title">問　診　票</div>';
   body+='<div class="rec-date">記入日: '+now+'</div>';
 
@@ -475,7 +475,7 @@ function buildLayoutHTML(d, mode){
 
   }
 
-  body+='<div class="footer">ひかり鍼灸整骨院 〒672-8043 兵庫県姫路市飾磨区上野田3丁目81番地3 / TEL: 079-228-9687</div>';
+  body+='<div class="footer">'+(window._clinicFooter||'ひかり鍼灸整骨院')+'</div>';
   if(mode==='print'){
     body+='<script>'
       +'function doPrint(){window.print();}'
@@ -484,7 +484,7 @@ function buildLayoutHTML(d, mode){
   body+='</div>'; /* /page */
 
   return '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">'
-    +'<title>問診票 — ひかり鍼灸整骨院</title>'
+    +'<title>問診票 — '+(window._clinicName||'ひかり鍼灸整骨院')+'</title>'
     +'<style>'+css+'</style></head><body>'+body+'</body></html>';
 }
 
@@ -492,7 +492,7 @@ function buildLayoutHTML(d, mode){
 
 /* メール送信（グローバル関数） */
 function sendEmail(d){
-  var dest=document.getElementById('destEmail').value.trim();
+  var dest=document.getElementById('destEmail').value.trim()||(window._clinicEmail||'');
   if(!dest){alert('送信先メールアドレスを入力してください');return;}
   var htmlBody=buildLayoutHTML(d,'email');
   var printBody=buildLayoutHTML(d,'print');
@@ -565,6 +565,7 @@ function _getData(){
     .then(function(clinic){
       if(!clinic||clinic.error) return;
       window._clinicName=clinic.name;
+      window._clinicEmail=clinic.email||'';
       window._clinicFooter=clinic.name
         +(clinic.address?' '+clinic.address:'')
         +(clinic.tel?' / TEL: '+clinic.tel:'');
