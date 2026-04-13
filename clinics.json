@@ -4,5 +4,11 @@
     "email": "info@hikari.jp",
     "address": "〒672-8043 兵庫県姫路市飾磨区上野田3丁目81番地3",
     "tel": "079-228-9687"
+  },
+  "test": {
+    "name": "テスト整骨院",
+    "email": "info@deaidou.jp",
+    "address": "姫路市中地",
+    "tel": "123-456-789"
   }
 }
