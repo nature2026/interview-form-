@@ -19,7 +19,9 @@ def fetch_top_news(page_size=3):
     }
     res = requests.get(url, params=params, timeout=10)
     res.raise_for_status()
-    articles = res.json().get("articles", [])
+    data = res.json()
+    print(f"API response status: {data.get('status')}, totalResults: {data.get('totalResults')}")
+    articles = data.get("articles", [])
     return articles
 
 
@@ -49,7 +51,7 @@ def post_to_x(text):
 def main():
     articles = fetch_top_news(page_size=3)
     if not articles:
-        print("ニュースが取得できませんでした")
+        print(f"ニュースが取得できませんでした (articles count: {len(articles)})")
         return
 
     tweet = build_tweet(articles)
