@@ -11,8 +11,8 @@ def fetch_top_news(page_size=3):
     api_key = os.getenv("NEWS_API_KEY")
     url = "https://newsapi.org/v2/everything"
     params = {
-        "q": "日本 OR Japan",
-        "language": "ja",
+        "q": "Japan",
+        "language": "en",
         "sortBy": "publishedAt",
         "pageSize": page_size,
         "apiKey": api_key,
