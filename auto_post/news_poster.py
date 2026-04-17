@@ -7,11 +7,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- News 取得 ---
-def fetch_top_news(country="jp", page_size=3):
+def fetch_top_news(page_size=3):
     api_key = os.getenv("NEWS_API_KEY")
-    url = "https://newsapi.org/v2/top-headlines"
+    url = "https://newsapi.org/v2/everything"
     params = {
-        "country": country,
+        "q": "日本 OR Japan",
+        "language": "ja",
+        "sortBy": "publishedAt",
         "pageSize": page_size,
         "apiKey": api_key,
     }
@@ -45,7 +47,7 @@ def post_to_x(text):
 
 
 def main():
-    articles = fetch_top_news(country="jp", page_size=3)
+    articles = fetch_top_news(page_size=3)
     if not articles:
         print("ニュースが取得できませんでした")
         return
