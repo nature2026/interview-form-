@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お支払い完了 — コンサルティング</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:15px;line-height:1.6;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.wrap{max-width:520px;width:100%;margin:0 auto;padding:2rem 1rem}
+.card{background:#fff;border-radius:16px;padding:2.5rem 2rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.check-icon{width:72px;height:72px;background:#E1F5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:32px}
+h1{font-size:22px;font-weight:700;margin-bottom:10px;color:#1a1a1a}
+.sub{font-size:14px;color:#666;margin-bottom:2rem;line-height:1.8}
+
+.next-steps{background:#f9f9f7;border-radius:12px;padding:1.25rem;margin-bottom:2rem;text-align:left}
+.next-steps h2{font-size:13px;font-weight:700;color:#555;margin-bottom:12px;letter-spacing:.05em}
+.step-item{display:flex;gap:12px;align-items:flex-start;padding:8px 0}
+.step-item:not(:last-child){border-bottom:1px solid #eee}
+.step-num{width:28px;height:28px;background:#1D9E75;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-text strong{font-size:14px;font-weight:700;display:block;margin-bottom:2px}
+.step-text span{font-size:12px;color:#888}
+
+.email-notice{background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;font-size:13px;color:#856404;margin-bottom:2rem;line-height:1.7}
+
+.back-btn{display:inline-block;font-size:14px;color:#1D9E75;font-weight:600;text-decoration:none;padding:10px 24px;border:1.5px solid #1D9E75;border-radius:9px;transition:all .15s}
+.back-btn:hover{background:#E1F5EE}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="check-icon">✅</div>
+    <h1>お支払いが完了しました</h1>
+    <p class="sub">
+      1時間オンラインコンサルティングの<br>
+      お申し込みありがとうございます。
+    </p>
+
+    <div class="next-steps">
+      <h2>次のステップ</h2>
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>メールをご確認ください</strong>
+          <span>タイムレックスの日程調整URLをお送りしました</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>ご都合の日時を選択</strong>
+          <span>タイムレックスにてご希望の日時をご予約ください</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Zoomにてコンサルティング</strong>
+          <span>予約日時にZoomでお話しましょう（1時間）</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="email-notice">
+      📧 メールが届かない場合は迷惑メールフォルダもご確認ください。<br>
+      それでも届かない場合はお問い合わせください。
+    </div>
+
+    <a href="/consultation" class="back-btn">申し込みページに戻る</a>
+  </div>
+</div>
+</body>
+</html>
