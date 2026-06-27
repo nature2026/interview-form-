@@ -1,42 +1,44 @@
 import os
 import tweepy
-import requests
+import feedparser
 from datetime import date
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- News 取得 ---
-def fetch_top_news(page_size=3):
-    api_key = os.getenv("NEWS_API_KEY")
-    url = "https://newsapi.org/v2/everything"
-    params = {
-        "q": "Japan",
-        "language": "en",
-        "sortBy": "publishedAt",
-        "pageSize": page_size,
-        "apiKey": api_key,
-    }
-    res = requests.get(url, params=params, timeout=10)
-    res.raise_for_status()
-    data = res.json()
-    print(f"API response status: {data.get('status')}, totalResults: {data.get('totalResults')}")
-    articles = data.get("articles", [])
+RSS_FEEDS = [
+    "https://www3.nhk.or.jp/nhkworld/en/news/feeds/",       # NHK World (無料)
+    "https://feeds.reuters.com/reuters/topNews",             # Reuters Top News (無料)
+    "https://rss.cnn.com/rss/edition_world.rss",            # CNN World (無料)
+]
+
+
+def fetch_top_news(count=3):
+    articles = []
+    for feed_url in RSS_FEEDS:
+        if len(articles) >= count:
+            break
+        feed = feedparser.parse(feed_url)
+        for entry in feed.entries:
+            if len(articles) >= count:
+                break
+            title = entry.get("title", "").strip()
+            link = entry.get("link", "").strip()
+            if title and link:
+                articles.append({"title": title, "url": link})
     return articles
 
 
-# --- ツイート本文を組み立てる ---
 def build_tweet(articles):
     today = date.today().strftime("%Y/%m/%d")
-    lines = [f"📰 今日のニュース ({today})\n"]
+    lines = [f"📰 Today's News ({today})\n"]
     for i, article in enumerate(articles, 1):
-        title = article.get("title", "").split(" - ")[0]  # 媒体名を除去
-        url = article.get("url", "")
+        title = article["title"].split(" - ")[0]
+        url = article["url"]
         lines.append(f"{i}. {title}\n{url}\n")
     return "\n".join(lines)
 
 
-# --- X に投稿 ---
 def post_to_x(text):
     client = tweepy.Client(
         consumer_key=os.getenv("X_API_KEY"),
@@ -49,9 +51,9 @@ def post_to_x(text):
 
 
 def main():
-    articles = fetch_top_news(page_size=3)
+    articles = fetch_top_news(count=3)
     if not articles:
-        print(f"ニュースが取得できませんでした (articles count: {len(articles)})")
+        print("ニュースが取得できませんでした")
         return
 
     tweet = build_tweet(articles)
